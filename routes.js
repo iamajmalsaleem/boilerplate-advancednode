@@ -8,7 +8,8 @@ app.route('/').get((req, res) => {
       title: 'Connected to Database',
       message: 'Please login',
       showLogin: true,
-      showRegistration: true
+      showRegistration: true,
+      showSocialAuth: true
     });
   });
 
@@ -64,11 +65,21 @@ app.route('/login').post(passport.authenticate('local', { failureRedirect: '/' }
       res.redirect('/profile');
     })
 
+    
+  app.route('/chat').get(ensureAuthenticated, (req, res) => {
+    res.render(process.cwd() + '/views/pug/chat', { user: req.user });
+  });
+
+  app.route('/auth/github').get(passport.authenticate('github'))
+  app.route('/auth/github/callback').get(passport.authenticate('github', { failureRedirect: '/' }), (req, res) => {
+     req.session.user_id = req.user.id
+      res.redirect('/chat');
+    })
+
   app.use((req, res, next) => {
     res.status(404)
       .type('text')
       .send('Not Found');
   });
-
 
 }
