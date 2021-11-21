@@ -36,16 +36,16 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
- io.use(
-    passportSocketIo.authorize({
-      cookieParser: cookieParser,
-      key: 'express.sid',
-      secret: process.env.SESSION_SECRET,
-      store: store,
-      success: onAuthorizeSuccess,
-      fail: onAuthorizeFail
-    })
-  );
+io.use(
+  passportSocketIo.authorize({
+    cookieParser: cookieParser,
+    key: 'express.sid',
+    secret: process.env.SESSION_SECRET,
+    store: store,
+    success: onAuthorizeSuccess,
+    fail: onAuthorizeFail
+  })
+);
 
 
 myDB(async client => {
@@ -60,12 +60,29 @@ myDB(async client => {
 
     console.log('user ' + socket.request.user.username + ' connected');
     ++currentUsers;
-    io.emit('user count', currentUsers);
+    io.emit('user', {
+      name: socket.request.user.username,
+      currentUsers,
+      connected: true
+    });
 
+    socket.on('chat message', message => {
+
+      io.emit('chat message', {
+        name: socket.request.user.username,
+        message: message
+      })
+
+    })
+    
     socket.on('disconnect', () => {
       console.log('A user has disconnected');
       --currentUsers;
-      io.emit('user count', currentUsers);
+      io.emit('user', {
+        name: socket.request.user.username,
+        currentUsers,
+        connected: false
+      });
     });
 
   });

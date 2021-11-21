@@ -1,9 +1,9 @@
 const passport = require('passport');
 const bcrypt = require('bcrypt');
 
-module.exports = function (app, myDataBase) {
+module.exports = function(app, myDataBase) {
 
-app.route('/').get((req, res) => {
+  app.route('/').get((req, res) => {
     res.render('pug', {
       title: 'Connected to Database',
       message: 'Please login',
@@ -13,10 +13,11 @@ app.route('/').get((req, res) => {
     });
   });
 
-app.route('/login').post(passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
-    res.redirect('/profile');
+  app.route('/login').post(passport.authenticate('local', { failureRedirect: '/' }), (req, res) => {
+    //res.redirect('/profile');
+    res.redirect('/chat');
   });
-  
+
   function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) {
       return next();
@@ -26,7 +27,9 @@ app.route('/login').post(passport.authenticate('local', { failureRedirect: '/' }
 
   app.route('/profile').get(ensureAuthenticated, (req, res) => {
     res.render(process.cwd() + '/views/pug/profile', { username: req.user.username });
+
   });
+
 
   app.route('/logout')
     .get((req, res) => {
@@ -34,7 +37,7 @@ app.route('/login').post(passport.authenticate('local', { failureRedirect: '/' }
       res.redirect('/');
     });
 
-      app.route('/register').post((req, res, next) => {
+  app.route('/register').post((req, res, next) => {
 
     const hash = bcrypt.hashSync(req.body.password, 12);
 
@@ -65,16 +68,20 @@ app.route('/login').post(passport.authenticate('local', { failureRedirect: '/' }
       res.redirect('/profile');
     })
 
-    
+
   app.route('/chat').get(ensureAuthenticated, (req, res) => {
-    res.render(process.cwd() + '/views/pug/chat', { user: req.user });
+
+    res.render(process.cwd() + '/views/pug/chat');
+
+    //res.render(process.cwd() + '/views/pug/chat', { user: req.user });
+
   });
 
   app.route('/auth/github').get(passport.authenticate('github'))
   app.route('/auth/github/callback').get(passport.authenticate('github', { failureRedirect: '/' }), (req, res) => {
-     req.session.user_id = req.user.id
-      res.redirect('/chat');
-    })
+    req.session.user_id = req.user.id
+    res.redirect('/chat');
+  })
 
   app.use((req, res, next) => {
     res.status(404)
