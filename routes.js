@@ -73,8 +73,6 @@ module.exports = function(app, myDataBase) {
 
     res.render(process.cwd() + '/views/pug/chat');
 
-    //res.render(process.cwd() + '/views/pug/chat', { user: req.user });
-
   });
 
   app.route('/auth/github').get(passport.authenticate('github'))
